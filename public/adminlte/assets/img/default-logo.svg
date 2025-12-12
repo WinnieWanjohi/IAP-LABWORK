@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="150" height="50">
+  <rect width="150" height="50" fill="#6c757d"/>
+  <text x="75" y="25" text-anchor="middle" alignment-baseline="middle" 
+        fill="white" font-family="Arial" font-size="16">Logo</text>
+</svg>
