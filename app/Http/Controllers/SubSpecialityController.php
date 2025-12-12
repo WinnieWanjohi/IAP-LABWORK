@@ -2,67 +2,69 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\SubSpeciality;
+use App\Models\Speciality;
 use Illuminate\Http\Request;
 
 class SubSpecialityController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        return view('subspecialities.index');
+        $subSpecialities = SubSpeciality::with('speciality')->latest()->paginate(10);
+        return view('subspecialities.index', compact('subSpecialities'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        return view('subspecialities.create');
+        $specialities = Speciality::all();
+        return view('subspecialities.create', compact('specialities'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
+        $request->validate([
+            'name' => 'required|max:255',
+            'speciality_id' => 'required|exists:specialities,id',
+            'description' => 'nullable|string',
+        ]);
+
+        SubSpeciality::create($request->all());
+
         return redirect()->route('subspecialities.index')
-            ->with('success', 'Sub-speciality created successfully.');
+            ->with('success', 'Sub Speciality created successfully.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function show(SubSpeciality $subspeciality)
     {
-        return view('subspecialities.show', compact('id'));
+        $subspeciality->load('speciality', 'practitioners');
+        return view('subspecialities.show', compact('subspeciality'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function edit(SubSpeciality $subspeciality)
     {
-        return view('subspecialities.edit', compact('id'));
+        $specialities = Speciality::all();
+        return view('subspecialities.edit', compact('subspeciality', 'specialities'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function update(Request $request, SubSpeciality $subspeciality)
     {
+        $request->validate([
+            'name' => 'required|max:255',
+            'speciality_id' => 'required|exists:specialities,id',
+            'description' => 'nullable|string',
+        ]);
+
+        $subspeciality->update($request->all());
+
         return redirect()->route('subspecialities.index')
-            ->with('success', 'Sub-speciality updated successfully.');
+            ->with('success', 'Sub Speciality updated successfully.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy(SubSpeciality $subspeciality)
     {
+        $subspeciality->delete();
+
         return redirect()->route('subspecialities.index')
-            ->with('success', 'Sub-speciality deleted successfully.');
+            ->with('success', 'Sub Speciality deleted successfully.');
     }
 }
-CONTROLLER

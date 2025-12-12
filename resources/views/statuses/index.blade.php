@@ -1,47 +1,45 @@
 @extends('layouts.app')
 
-@section('title', 'Sub Specialities')
-@section('page-title', 'Sub Specialities')
+@section('title', 'Statuses')
+@section('page-title', 'Statuses')
 
 @section('header-buttons')
-    <a href="{{ route('subspecialities.create') }}" class="btn btn-primary">
-        <i class="fas fa-plus me-1"></i>Add Sub Speciality
+    <a href="{{ route('statuses.create') }}" class="btn btn-primary">
+        <i class="fas fa-plus me-1"></i>Add Status
     </a>
 @endsection
 
 @section('content')
 <div class="card">
     <div class="card-body">
-        @if($subSpecialities->count() > 0)
+        @if($statuses->count() > 0)
             <div class="table-responsive">
                 <table class="table table-hover">
                     <thead>
                         <tr>
                             <th>ID</th>
                             <th>Name</th>
-                            <th>Speciality</th>
                             <th>Description</th>
                             <th>Created</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($subSpecialities as $subSpeciality)
+                        @foreach($statuses as $status)
                         <tr>
-                            <td>{{ $subSpeciality->id }}</td>
-                            <td>{{ $subSpeciality->name }}</td>
-                            <td>{{ $subSpeciality->speciality->name }}</td>
-                            <td>{{ Str::limit($subSpeciality->description, 50) }}</td>
-                            <td>{{ $subSpeciality->created_at->format('Y-m-d') }}</td>
+                            <td>{{ $status->id }}</td>
+                            <td>{{ $status->name }}</td>
+                            <td>{{ Str::limit($status->description, 50) }}</td>
+                            <td>{{ $status->created_at->format('Y-m-d') }}</td>
                             <td>
                                 <div class="btn-group" role="group">
-                                    <a href="{{ route('subspecialities.show', $subSpeciality) }}" class="btn btn-sm btn-info">
+                                    <a href="{{ route('statuses.show', $status) }}" class="btn btn-sm btn-info">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <a href="{{ route('subspecialities.edit', $subSpeciality) }}" class="btn btn-sm btn-warning">
+                                    <a href="{{ route('statuses.edit', $status) }}" class="btn btn-sm btn-warning">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <form action="{{ route('subspecialities.destroy', $subSpeciality) }}" method="POST" class="d-inline">
+                                    <form action="{{ route('statuses.destroy', $status) }}" method="POST" class="d-inline">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-sm btn-danger" 
@@ -58,15 +56,15 @@
             </div>
             
             <div class="d-flex justify-content-center">
-                {{ $subSpecialities->links() }}
+                {{ $statuses->links() }}
             </div>
         @else
             <div class="text-center py-5">
                 <i class="fas fa-tags fa-3x text-muted mb-3"></i>
-                <h4>No sub specialities found</h4>
-                <p class="text-muted">Get started by adding your first sub speciality.</p>
-                <a href="{{ route('subspecialities.create') }}" class="btn btn-primary">
-                    <i class="fas fa-plus me-1"></i>Add Sub Speciality
+                <h4>No statuses found</h4>
+                <p class="text-muted">Get started by adding your first status.</p>
+                <a href="{{ route('statuses.create') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-1"></i>Add Status
                 </a>
             </div>
         @endif

@@ -9,7 +9,7 @@ class SpecialityController extends Controller
 {
     public function index()
     {
-        $specialities = Speciality::withCount('practitioners')->latest()->get();
+        $specialities = Speciality::withCount('practitioners')->latest()->paginate(10);
         return view('specialities.index', compact('specialities'));
     }
 
@@ -20,13 +20,12 @@ class SpecialityController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|unique:specialities',
-            'code' => 'nullable|unique:specialities',
+        $request->validate([
+            'name' => 'required|unique:specialities|max:255',
             'description' => 'nullable|string',
         ]);
 
-        Speciality::create($validated);
+        Speciality::create($request->all());
 
         return redirect()->route('specialities.index')
             ->with('success', 'Speciality created successfully.');
@@ -34,7 +33,7 @@ class SpecialityController extends Controller
 
     public function show(Speciality $speciality)
     {
-        $speciality->load(['subSpecialities', 'practitioners']);
+        $speciality->load('practitioners', 'subSpecialities');
         return view('specialities.show', compact('speciality'));
     }
 
@@ -45,13 +44,12 @@ class SpecialityController extends Controller
 
     public function update(Request $request, Speciality $speciality)
     {
-        $validated = $request->validate([
-            'name' => 'required|unique:specialities,name,' . $speciality->id,
-            'code' => 'nullable|unique:specialities,code,' . $speciality->id,
+        $request->validate([
+            'name' => 'required|max:255|unique:specialities,name,' . $speciality->id,
             'description' => 'nullable|string',
         ]);
 
-        $speciality->update($validated);
+        $speciality->update($request->all());
 
         return redirect()->route('specialities.index')
             ->with('success', 'Speciality updated successfully.');
@@ -59,11 +57,6 @@ class SpecialityController extends Controller
 
     public function destroy(Speciality $speciality)
     {
-        if ($speciality->practitioners()->count() > 0) {
-            return redirect()->route('specialities.index')
-                ->with('error', 'Cannot delete speciality with associated practitioners.');
-        }
-
         $speciality->delete();
 
         return redirect()->route('specialities.index')

@@ -1,49 +1,83 @@
-@extends('layouts.admin')
+@extends('layouts.app')
 
-@section('title', 'Institutions Management')
+@section('title', 'Institutions')
 @section('page-title', 'Institutions')
 
-@section('breadcrumb')
-    <li class="breadcrumb-item"><a href="{{ url('/') }}">Home</a></li>
-    <li class="breadcrumb-item active">Institutions</li>
+@section('header-buttons')
+    <a href="{{ route('institutions.create') }}" class="btn btn-primary">
+        <i class="fas fa-plus me-1"></i>Add Institution
+    </a>
 @endsection
 
 @section('content')
 <div class="card">
-    <div class="card-header">
-        <h3 class="card-title">All Institutions</h3>
-        <div class="card-tools">
-            <a href="{{ route('institutions.create') }}" class="btn btn-primary btn-sm">
-                <i class="bi bi-plus-circle"></i> Add New
-            </a>
-        </div>
-    </div>
     <div class="card-body">
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Created At</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>1</td>
-                    <td>Sample Institutions</td>
-                    <td>{{ date('Y-m-d') }}</td>
-                    <td>
-                        <a href="{{ route('institutions.show', 1) }}" class="btn btn-info btn-sm">
-                            <i class="bi bi-eye"></i>
-                        </a>
-                        <a href="{{ route('institutions.edit', 1) }}" class="btn btn-warning btn-sm">
-                            <i class="bi bi-pencil"></i>
-                        </a>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+        @if($institutions->count() > 0)
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Location</th>
+                            <th>Qualifications</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($institutions as $institution)
+                        <tr>
+                            <td>{{ $institution->id }}</td>
+                            <td>{{ $institution->name }}</td>
+                            <td>
+                                @if($institution->city || $institution->country)
+                                    {{ $institution->city ?? '' }}{{ $institution->city && $institution->country ? ', ' : '' }}{{ $institution->country ?? '' }}
+                                @else
+                                    <span class="text-muted">N/A</span>
+                                @endif
+                            </td>
+                            <td>
+                                <span class="badge bg-info">{{ $institution->qualifications_count }}</span>
+                            </td>
+                            <td>{{ $institution->created_at->format('Y-m-d') }}</td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="{{ route('institutions.show', $institution) }}" class="btn btn-sm btn-info">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{{ route('institutions.edit', $institution) }}" class="btn btn-sm btn-warning">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form action="{{ route('institutions.destroy', $institution) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-danger" 
+                                                onclick="return confirm('Are you sure?')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="d-flex justify-content-center">
+                {{ $institutions->links() }}
+            </div>
+        @else
+            <div class="text-center py-5">
+                <i class="fas fa-university fa-3x text-muted mb-3"></i>
+                <h4>No institutions found</h4>
+                <p class="text-muted">Get started by adding your first institution.</p>
+                <a href="{{ route('institutions.create') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-1"></i>Add Institution
+                </a>
+            </div>
+        @endif
     </div>
 </div>
 @endsection

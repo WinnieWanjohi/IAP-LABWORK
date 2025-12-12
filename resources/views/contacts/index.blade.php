@@ -1,49 +1,87 @@
-@extends('layouts.admin')
+@extends('layouts.app')
 
-@section('title', 'Contacts Management')
+@section('title', 'Contacts')
 @section('page-title', 'Contacts')
 
-@section('breadcrumb')
-    <li class="breadcrumb-item"><a href="{{ url('/') }}">Home</a></li>
-    <li class="breadcrumb-item active">Contacts</li>
+@section('header-buttons')
+    <a href="{{ route('contacts.create') }}" class="btn btn-primary">
+        <i class="fas fa-plus me-1"></i>Add Contact
+    </a>
 @endsection
 
 @section('content')
 <div class="card">
-    <div class="card-header">
-        <h3 class="card-title">All Contacts</h3>
-        <div class="card-tools">
-            <a href="{{ route('contacts.create') }}" class="btn btn-primary btn-sm">
-                <i class="bi bi-plus-circle"></i> Add New
-            </a>
-        </div>
-    </div>
     <div class="card-body">
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Created At</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>1</td>
-                    <td>Sample Contacts</td>
-                    <td>{{ date('Y-m-d') }}</td>
-                    <td>
-                        <a href="{{ route('contacts.show', 1) }}" class="btn btn-info btn-sm">
-                            <i class="bi bi-eye"></i>
-                        </a>
-                        <a href="{{ route('contacts.edit', 1) }}" class="btn btn-warning btn-sm">
-                            <i class="bi bi-pencil"></i>
-                        </a>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+        @if($contacts->count() > 0)
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Practitioner</th>
+                            <th>Phone</th>
+                            <th>Email</th>
+                            <th>Fax</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($contacts as $contact)
+                        <tr>
+                            <td>{{ $contact->id }}</td>
+                            <td>
+                                <a href="{{ route('practitioners.show', $contact->practitioner_id) }}">
+                                    {{ $contact->practitioner->full_name }}
+                                </a>
+                            </td>
+                            <td>{{ $contact->phone ?? 'N/A' }}</td>
+                            <td>
+                                @if($contact->email)
+                                    <a href="mailto:{{ $contact->email }}">{{ $contact->email }}</a>
+                                @else
+                                    N/A
+                                @endif
+                            </td>
+                            <td>{{ $contact->fax ?? 'N/A' }}</td>
+                            <td>{{ $contact->created_at->format('Y-m-d') }}</td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="{{ route('contacts.show', $contact) }}" class="btn btn-sm btn-info">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{{ route('contacts.edit', $contact) }}" class="btn btn-sm btn-warning">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form action="{{ route('contacts.destroy', $contact) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-danger" 
+                                                onclick="return confirm('Are you sure?')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="d-flex justify-content-center">
+                {{ $contacts->links() }}
+            </div>
+        @else
+            <div class="text-center py-5">
+                <i class="fas fa-address-book fa-3x text-muted mb-3"></i>
+                <h4>No contacts found</h4>
+                <p class="text-muted">Get started by adding your first contact.</p>
+                <a href="{{ route('contacts.create') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-1"></i>Add Contact
+                </a>
+            </div>
+        @endif
     </div>
 </div>
 @endsection

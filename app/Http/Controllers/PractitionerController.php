@@ -10,100 +10,84 @@ use Illuminate\Http\Request;
 
 class PractitionerController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         $practitioners = Practitioner::with(['status', 'speciality', 'subSpeciality'])
             ->latest()
-            ->paginate(20);
+            ->paginate(10);
         
         return view('practitioners.index', compact('practitioners'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        $statuses = Status::where('is_active', true)->get();
+        $statuses = Status::all();
         $specialities = Speciality::all();
         $subSpecialities = SubSpeciality::all();
         
         return view('practitioners.create', compact('statuses', 'specialities', 'subSpecialities'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'registration_number' => 'required|unique:practitioners',
-            'fullname' => 'required|string|max:255',
-            'status_id' => 'nullable|exists:statuses,id',
+        $request->validate([
+            'registration_number' => 'required|unique:practitioners|max:50',
+            'full_name' => 'required|max:255',
+            'status_id' => 'required|exists:statuses,id',
             'speciality_id' => 'nullable|exists:specialities,id',
             'sub_speciality_id' => 'nullable|exists:sub_specialities,id',
             'address' => 'nullable|string',
-            'registration_date' => 'nullable|date',
-            'expiry_date' => 'nullable|date',
+            'profile_link' => 'nullable|url',
         ]);
 
-        Practitioner::create($validated);
+        Practitioner::create($request->all());
 
         return redirect()->route('practitioners.index')
             ->with('success', 'Practitioner created successfully.');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Practitioner $practitioner)
     {
-        $practitioner->load(['status', 'speciality', 'subSpeciality', 'contacts', 'qualifications.degree', 'qualifications.institution', 'licenses']);
+        $practitioner->load([
+            'status',
+            'speciality',
+            'subSpeciality',
+            'contacts',
+            'qualifications.degree',
+            'qualifications.institution',
+            'licenses'
+        ]);
         
         return view('practitioners.show', compact('practitioner'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Practitioner $practitioner)
     {
-        $statuses = Status::where('is_active', true)->get();
+        $statuses = Status::all();
         $specialities = Speciality::all();
         $subSpecialities = SubSpeciality::all();
         
         return view('practitioners.edit', compact('practitioner', 'statuses', 'specialities', 'subSpecialities'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Practitioner $practitioner)
     {
-        $validated = $request->validate([
-            'registration_number' => 'required|unique:practitioners,registration_number,' . $practitioner->id,
-            'fullname' => 'required|string|max:255',
-            'status_id' => 'nullable|exists:statuses,id',
+        $request->validate([
+            'registration_number' => 'required|max:50|unique:practitioners,registration_number,' . $practitioner->id,
+            'full_name' => 'required|max:255',
+            'status_id' => 'required|exists:statuses,id',
             'speciality_id' => 'nullable|exists:specialities,id',
             'sub_speciality_id' => 'nullable|exists:sub_specialities,id',
             'address' => 'nullable|string',
-            'registration_date' => 'nullable|date',
-            'expiry_date' => 'nullable|date',
-            'is_active' => 'boolean',
+            'profile_link' => 'nullable|url',
         ]);
 
-        $practitioner->update($validated);
+        $practitioner->update($request->all());
 
         return redirect()->route('practitioners.index')
             ->with('success', 'Practitioner updated successfully.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Practitioner $practitioner)
     {
         $practitioner->delete();

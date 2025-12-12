@@ -9,13 +9,16 @@ use App\Http\Controllers\{
     SpecialityController,
     SubSpecialityController,
     InstitutionsController,
-    DegreesController
+    DegreesController,
+    StatusController,
+    QualificationController,
+    LicenseController
 };
 
 // ==================== FRONTEND ROUTES ====================
 Route::get('/', function () {
     return view('frontend.home');
-})->name('frontend.home');  // Main home page
+})->name('frontend.home');
 
 Route::get('/about', function () {
     return view('frontend.about');
@@ -25,7 +28,7 @@ Route::get('/verify', function () {
     return view('frontend.verify');
 })->name('frontend.verify');
 
-// Admin Panel link - redirects to admin dashboard
+// Admin Panel link
 Route::get('/mkubwa', function () {
     return redirect()->route('admin.dashboard');
 })->name('admin.panel');
@@ -38,6 +41,9 @@ Route::prefix('admin')->group(function () {
             'pageTitle' => 'Dashboard',
             'userCount' => \App\Models\User::count(),
             'roleCount' => \App\Models\Role::count(),
+            'practitionerCount' => \App\Models\Practitioner::count(),
+            'specialityCount' => \App\Models\Speciality::count(),
+            'institutionCount' => \App\Models\Institution::count(),
         ]);
     })->name('admin.dashboard');
     
@@ -52,17 +58,15 @@ Route::prefix('admin')->group(function () {
 });
 
 // ==================== LEGACY/COMPATIBILITY ROUTES ====================
-// Redirect old /dashboard to admin dashboard
 Route::get('/dashboard', function () {
     return redirect()->route('admin.dashboard');
 });
 
-// Redirect /roles to admin/roles for backward compatibility
 Route::get('/roles', function () {
     return redirect()->route('admin.roles.index');
 });
 
-// KMPDC Import Routes
+// ==================== KMPDC IMPORT ROUTES ====================
 Route::prefix('kmpdc')->name('kmpdc.')->group(function () {
     Route::get('/import', [\App\Http\Controllers\KmpdcImportController::class, 'index'])->name('import.index');
     Route::post('/sync', [\App\Http\Controllers\KmpdcImportController::class, 'sync'])->name('sync');
@@ -71,17 +75,19 @@ Route::prefix('kmpdc')->name('kmpdc.')->group(function () {
     Route::post('/run-all', [\App\Http\Controllers\KmpdcImportController::class, 'runAll'])->name('runAll');
 });
 
-// Resource Routes (NO AUTHENTICATION REQUIRED)
-Route::resource('practitioners', PractitionerController::class);
-Route::resource('contacts', ContactController::class);
-Route::resource('users', UserController::class);
-Route::resource('statuses', statusesController::class);
+// ==================== RESOURCE ROUTES ====================
+Route::resource('statuses', StatusController::class);
 Route::resource('specialities', SpecialityController::class);
 Route::resource('subspecialities', SubSpecialityController::class);
-Route::resource('institutions', InstitutionsController::class);
-Route::resource('degrees', DegreesController::class);
+Route::resource('institutions', InstitutionController::class);
+Route::resource('degrees', DegreeController::class);
+Route::resource('practitioners', PractitionerController::class);
+Route::resource('contacts', ContactController::class);
+Route::resource('qualifications', QualificationController::class);
+Route::resource('licenses', LicenseController::class);
+Route::resource('users', UserController::class);
 
-// Fallback route
+// ==================== FALLBACK ROUTE ====================
 Route::fallback(function () {
-    return redirect()->route('home');
+    return redirect()->route('frontend.home');
 });

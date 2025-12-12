@@ -2,67 +2,71 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Contact;
+use App\Models\Practitioner;
 use Illuminate\Http\Request;
 
 class ContactController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        return view('contacts.index');
+        $contacts = Contact::with('practitioner')->latest()->paginate(10);
+        return view('contacts.index', compact('contacts'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        return view('contacts.create');
+        $practitioners = Practitioner::all();
+        return view('contacts.create', compact('practitioners'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
+        $request->validate([
+            'practitioner_id' => 'required|exists:practitioners,id',
+            'phone' => 'nullable|string|max:20',
+            'email' => 'nullable|email|max:255',
+            'fax' => 'nullable|string|max:20',
+        ]);
+
+        Contact::create($request->all());
+
         return redirect()->route('contacts.index')
             ->with('success', 'Contact created successfully.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function show(Contact $contact)
     {
-        return view('contacts.show', compact('id'));
+        $contact->load('practitioner');
+        return view('contacts.show', compact('contact'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function edit(Contact $contact)
     {
-        return view('contacts.edit', compact('id'));
+        $practitioners = Practitioner::all();
+        return view('contacts.edit', compact('contact', 'practitioners'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Contact $contact)
     {
+        $request->validate([
+            'practitioner_id' => 'required|exists:practitioners,id',
+            'phone' => 'nullable|string|max:20',
+            'email' => 'nullable|email|max:255',
+            'fax' => 'nullable|string|max:20',
+        ]);
+
+        $contact->update($request->all());
+
         return redirect()->route('contacts.index')
             ->with('success', 'Contact updated successfully.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy(Contact $contact)
     {
+        $contact->delete();
+
         return redirect()->route('contacts.index')
             ->with('success', 'Contact deleted successfully.');
     }
 }
-CONTROLLER
