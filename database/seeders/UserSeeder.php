@@ -11,29 +11,55 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        // Get roles
+        // Get admin role
         $adminRole = Role::where('slug', 'admin')->first();
-        $userRole = Role::where('slug', 'user')->first();
+        
+        if (!$adminRole) {
+            $adminRole = Role::create([
+                'name' => 'Administrator',
+                'slug' => 'admin',
+                'description' => 'Full system access'
+            ]);
+        }
 
         // Create admin user
         User::create([
-            'name' => 'System Administrator',
-            'email' => 'admin@thibitisha.test',
-            'password' => Hash::make('password123'),
+            'name' => 'Super Admin',
+            'email' => 'admin@example.com',
+            'password' => Hash::make('password'),
             'role_id' => $adminRole->id,
+            'phone' => '+254700000001',
+            'is_active' => true,
+            'email_verified_at' => now(),
         ]);
 
-        // Create regular user
+        // Create a few more users
         User::create([
             'name' => 'John Doe',
-            'email' => 'john@thibitisha.test',
-            'password' => Hash::make('password123'),
-            'role_id' => $userRole->id,
+            'email' => 'john@example.com',
+            'password' => Hash::make('password'),
+            'role_id' => Role::where('slug', 'manager')->first()->id ?? null,
+            'phone' => '+254700000002',
+            'is_active' => true,
         ]);
 
-        // Create 8 more random users
-        User::factory(8)->create();
+        User::create([
+            'name' => 'Jane Smith',
+            'email' => 'jane@example.com',
+            'password' => Hash::make('password'),
+            'role_id' => Role::where('slug', 'editor')->first()->id ?? null,
+            'phone' => '+254700000003',
+            'is_active' => true,
+        ]);
 
-        $this->command->info('Users seeded successfully!');
+        // Create an inactive user
+        User::create([
+            'name' => 'Inactive User',
+            'email' => 'inactive@example.com',
+            'password' => Hash::make('password'),
+            'role_id' => Role::where('slug', 'viewer')->first()->id ?? null,
+            'phone' => '+254700000004',
+            'is_active' => false,
+        ]);
     }
 }

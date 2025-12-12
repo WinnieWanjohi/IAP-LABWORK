@@ -3,11 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Support\Facades\Hash;
 
 class User extends Authenticatable
 {
@@ -86,12 +86,82 @@ class User extends Authenticatable
     }
 
     /**
-     * Get user's full name with title.
+     * Scope for active users.
      */
-    protected function fullName(): Attribute
+    public function scopeActive($query)
     {
-        return Attribute::make(
-            get: fn () => $this->name,
-        );
+        return $query->where('is_active', true);
+    }
+
+    /**
+     * Scope for inactive users.
+     */
+    public function scopeInactive($query)
+    {
+        return $query->where('is_active', false);
+    }
+
+    /**
+     * Scope for searching users.
+     */
+    public function scopeSearch($query, $search)
+    {
+        return $query->where(function ($q) use ($search) {
+            $q->where('name', 'like', "%{$search}%")
+              ->orWhere('email', 'like', "%{$search}%")
+              ->orWhere('phone', 'like', "%{$search}%")
+              ->orWhereHas('role', function ($q) use ($search) {
+                  $q->where('name', 'like', "%{$search}%");
+              });
+        });
+    }
+
+    /**
+     * Get the user's status badge color.
+     */
+    public function getStatusColorAttribute(): string
+    {
+        return $this->is_active ? 'success' : 'danger';
+    }
+
+    /**
+     * Get the user's status text.
+     */
+    public function getStatusTextAttribute(): string
+    {
+        return $this->is_active ? 'Active' : 'Inactive';
+    }
+
+    /**
+     * Get the user's role name.
+     */
+    public function getRoleNameAttribute(): string
+    {
+        return $this->role ? $this->role->name : 'No Role';
+    }
+
+    /**
+     * Set the user's password with hashing.
+     */
+    public function setPasswordAttribute($value): void
+    {
+        $this->attributes['password'] = Hash::make($value);
+    }
+
+    /**
+     * Get the user's initials for avatar.
+     */
+    public function getInitialsAttribute(): string
+    {
+        $nameParts = explode(' ', $this->name);
+        $initials = '';
+        
+        if (count($nameParts) >= 2) {
+            $initials = strtoupper(substr($nameParts[0], 0, 1) . substr($nameParts[1], 0, 1));
+        } else {
+            $initials = strtoupper(substr($this->name, 0, 2));
+        }
+        
+        return $initials;
     }
 }

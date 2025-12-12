@@ -87,6 +87,11 @@ Route::resource('qualifications', QualificationController::class);
 Route::resource('licenses', LicenseController::class);
 Route::resource('users', UserController::class);
 
+// User Management Routes
+Route::resource('users', UserController::class);
+Route::patch('/users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggleStatus');
+Route::get('/users/{user}/activity', [UserController::class, 'activity'])->name('users.activity');
+
 // ==================== FALLBACK ROUTE ====================
 Route::fallback(function () {
     return redirect()->route('frontend.home');
